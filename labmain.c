@@ -122,11 +122,12 @@ int main() {
     display_string( textstring );
 
     display_time(mytime);
-
-    if ((mytime & 0xFFFF) == 0x0000) {
+   static int started = 0;
+    if (started && (mytime & 0xFFFF) == 0x0000) {
       hours++;
       if (hours == 24) hours = 0;
     }
+    started = 1;
     tick(&mytime);
     delay(2000);
 
