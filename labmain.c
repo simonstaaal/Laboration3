@@ -14,23 +14,16 @@ extern void tick(int*);
 extern void delay(int);
 extern int nextprime( int );
 
-
+/*Variables*/
 #define START_DISPLAY 0x04000050
 #define OFSET 0x10
 
-#define ZERO = 0x40
-#define  ONE = 0b01111001
-#define  TWO = 0x24
-
-
-
-
- int mytime = 0x000000;
- int hours = 0;
+int mytime = 0x000000;
+int hours = 0;
 volatile int* leds = (volatile int*) 0x04000000;
 volatile int* switches = (volatile int*) 0x04000010;
 
-
+/*Array for correct numbers on display*/
 int hex_numbers [] = {
   0x40, //0
   0x79, //1
@@ -55,31 +48,33 @@ void handle_interrupt(unsigned cause)
 void labinit(void)
 {}
 
+/*UPPGIFT 1C*/
 void set_leds(int led_mask){
   *leds = led_mask;
 }
 
+/*UPPGIFT 1E*/
 void set_displays(int display_number, int value){ /* display_number =displayen som ska anv . value = siffran på display*/
   volatile int* segment_display = (volatile int*)(START_DISPLAY + OFSET * display_number);
   *segment_display = value;
 
 }
 
+/*UPPGIFT 1F*/
+int get_sw(void){
+  return (*switches) & 0x3FF;
+}
+
+/*UPPGIFT 1G*/
 int get_btn(void){
   volatile int* second_push_button = (volatile int*) 0x040000d0;
   return *second_push_button;
 }
 
-int hex_to_dec(int hex){
- int tens = (hex >> 4) & 0xF;
- int secs = (hex & 0xF);
- int dec = tens * 10 + secs;
- return dec;
-}
-
+/*UPPGIFT H*/
 void display_time(int mytime){
- 
  mytime &= 0xFFFF;
+
   /*hours*/
   int h10 = hours/ 10;
   int h1 = hours % 10;
@@ -90,19 +85,6 @@ void display_time(int mytime){
   /*Seconds*/
   int s10 = (mytime >> 4) & 0xF;
   int s1 = mytime & 0xF;
-
-/*
-  print(" [debug] ");
-  print_dec(m10);
-  print(":");
-  print_dec(m1);
-  print(":");
-  print_dec(s10);
-  print(":");
-  print_dec(s1);
-  print("\n");
-*/
-  
 
   //Conver to Hex and display time
   set_displays(5, hex_numbers[h10]);
@@ -127,40 +109,15 @@ int main() {
 
 
   while(1){
-    /*
-    print("[mytime before time2string] ");
-    print_dec(mytime);
-    print("\n");
-
-    time2string( textstring, mytime );
-    
-    print("[mytime after time2string] ");
-    print_dec(mytime);
-    print("\n");
-    
-    print("[textstring content] ");
-    print(textstring);
-    print("\n");
-
-    display_time(mytime);
-    
-    print("[mytime before tick] ");
-    print_dec(mytime);
-    print("\n");
-    
-    tick(&mytime );
-    
-    print("[mytime after tick] ");
-    print_dec(mytime);
-    print("\n");
-    
-    delay(1500);
-
-    print("[mytime] ");
-    print_dec(mytime);
-    print("\n");
-    */
-
+    ///*********************** UPPGIFT 1D***************************** */
+    /*for(int i = 0x0; i < 0x10; i++){
+    delay(1000); 
+    set_leds(i);
+    }
+    delay(2000);
+    set_leds(0x0);*/
+  
+  
     time2string( textstring, mytime );
     display_string( textstring );
 
@@ -173,12 +130,8 @@ int main() {
     tick(&mytime);
     delay(2000);
 
-   
-    
-
-
     if(get_btn() == 1){
-      volatile int sw_binary = *switches; //Lagrar binära talet som finns i adressen switches.
+      int sw_binary = get_sw(); //Lagrar binära talet som finns i adressen switches.
       int switch_nr_display = sw_binary & 0x3F; //Talen som ska skrivas ut på displayen i binär form
       int switch_9 = (sw_binary & 0x200) >> 9;
       int switch_8 = (sw_binary & 0x100) >> 8;
@@ -208,14 +161,7 @@ int main() {
 
 
 
-  ///*********************** LAB 3 UPPGIFT A***************************** */
-   /*for(int i = 0x0; i < 0x10; i++){
-    delay(1000); 
-    set_leds(i);
-   }
-   delay(2000);
-   set_leds(0x0);*/
-    ///*********************** LAB 3 UPPGIFT A***************************** */
+  
 }
 
 
